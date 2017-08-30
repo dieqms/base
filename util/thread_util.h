@@ -94,12 +94,21 @@ public:
 		join();
 	}
 
-	bool start()
+	bool start(size_t stacksize = 8 * 1024 * 1024)
 	{
+		stacksize = (stacksize < PTHREAD_STACK_MIN) ? PTHREAD_STACK_MIN : stacksize;
+
+		pthread_attr_t attr;
 		if (!running)
 		{
 			running = true;
-			if (pthread_create(&thread_handle, NULL, loop, this) != 0)
+			if (pthread_attr_init(&attr) || pthread_attr_setstacksize(&attr, stacksize)) {
+				size_t get = 0;
+				pthread_attr_getstacksize(&attr, &get);
+				printf("[Pthread] error: set stacksize fail, set %lu get %lu\n", stacksize, get);
+			}
+
+			if (pthread_create(&thread_handle, &attr, loop, this) != 0)
 			{
 				printf("failed to create thread (%s)\n", thread_name.c_str());
 				return false;

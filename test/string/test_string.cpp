@@ -11,6 +11,8 @@ int main() {
 	StringUtil::ToHex(bin_str, 20, bin_array, 10, true);
 
 	printf("ToHex: %s\n", bin_str);
+
+	printf("int 32 to hex %c\n", StringUtil::ToHex(31));
 	return 0;
 }
 

@@ -16,509 +16,262 @@ using std::string;
 
 namespace Base {
 
+template<typename T>
+struct StringJoinConvert
+{
+	T operator()(T v) { return v; }
+};
+
 class StringUtil {
 public:
-	static inline uint16_t MakeU16(uint8_t h, uint8_t l) {
-		return h << 8 | l;
-	}
+	static bool IsNullOrSpace(const char* str, int len = -1); 
 
-	static inline uint32_t MakeU32(uint16_t h, uint16_t l) {
-		return h << 16 | l;
-	}
+	static bool IsNullOrEmpty(const char* str) ;
 
-	static inline uint32_t MakeU32(uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
-		return a << 24 | b << 16 || c << 8 | d;
-	}
+	static string& AppendFormat(string& str, const char* fmt, ...) ;
 
-	static inline uint64_t MakeU64(uint32_t h, uint32_t l) {
-		return (((uint64_t) h) << 16) | (uint64_t) l;
-	}
+	static string Format(const char* fmt, ...) ;
 
-	static inline uint8_t LoByte(uint16_t v) {
-		return (uint8_t) v;
-	}
+	static string& Format(string& str, const char* fmt, ...) ;
 
-	static inline uint8_t HiByte(uint16_t v) {
-		return (uint8_t)(v >> 8);
-	}
 
-	static inline uint16_t LoWord(uint32_t v) {
-		return (uint16_t) v;
-	}
-
-	static inline uint16_t HiWord(uint32_t v) {
-		return (uint16_t)(v >> 16);
-	}
-
-	static inline uint32_t LoDword(uint64_t v) {
-		return (uint32_t) v;
-	}
-
-	static inline uint32_t HiDword(uint64_t v) {
-		return (uint32_t)(v >> 32);
-	}
-
-	static bool IsNullOrSpace(const char* str, int len = -1) {
-		if (str == NULL) {
-			return true;
-		}
-
-		if (len == -1) {
-			len = INT_MAX;
-		}
-
-		for (int i = 0; i < len && str[i] != 0; ++i) {
-			if (!isspace(str[i])) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	static inline bool IsNullOrEmpty(const char* str) {
-		return str == NULL || *str == 0;
-	}
-
-	static string& AppendFormat(string& str, const char* fmt, ...) {
-		va_list ap;
-		va_start(ap, fmt);
-		_AppendFormatV(str, fmt, ap);
-		va_end(ap);
-		return str;
-	}
-
-	static string Format(const char* fmt, ...) {
-		string str;
-
-		va_list ap;
-		va_start(ap, fmt);
-		_AppendFormatV(str, fmt, ap);
-		va_end(ap);
-
-		return str;
-	}
-
-	static string& Format(string& str, const char* fmt, ...) {
-		str.clear();
-
-		va_list ap;
-		va_start(ap, fmt);
-		_AppendFormatV(str, fmt, ap);
-		va_end(ap);
-
-		return str;
-	}
-
-//	//convert binary to hex string
-//	static void ToHex(char* out, int outLen, const void* in, int inLen,
-//			bool upperCase = false) {
-//		const uint8_t* p = (const uint8_t*) in;
-//		inLen = std::min(inLen, outLen / 2);
-//		for (int i = inLen - 1; i >= 0; --i) {
-//			out[i * 2 + 1] = ToHex(p[i] & 0x0F, upperCase);
-//			out[i * 2] = ToHex((p[i] >> 4) & 0x0F, upperCase);
-//		}
-//	}
-//
-//	static string ToHex(const void* in, int inLen,
-//			bool upperCase = false) {
-//		string hex;
-//		hex.resize(inLen * 2);
-//
-//		const uint8_t* p = (const uint8_t*) in;
-//		for (int i = inLen - 1; i >= 0; --i) {
-//			hex.at(i * 2 + 1) = ToHex(p[i] & 0x0F, upperCase);
-//			hex.at(i * 2) = ToHex((p[i] >> 4) & 0x0F, upperCase);
-//		}
-//
-//		return hex;
-//	}
-//
-//	//convert hex string to binary
-//	static void FromHex(unsigned char* out, size_t outLen, const char *in,
-//			size_t inLen) {
-//		memset(out, 0, outLen);
-//
-//		if (inLen == (size_t) - 1) {
-//			inLen = strlen(in);
-//		}
-//
-//		inLen = std::min(inLen, outLen * 2);
-//
-//		for (size_t i = 0; (i + 1) < inLen; i += 2) {
-//			out[i / 2] = (FromHex(in[i + 1]) & 0x0F)
-//					| ((FromHex(in[i]) << 4) & 0xF0);
-//		}
-//	}
-//
-//	static uint8_t FromHex(char ch) {
-//		if (ch >= '0' && ch <= '9') {
-//			return ch - '0';
-//		} else if (ch >= 'a' && ch <= 'f') {
-//			return ch - 'a' + 10;
-//		} else if (ch >= 'A' && ch <= 'F') {
-//			return ch - 'A' + 10;
-//		} else {
-//			return 0;
-//		}
-//	}
-//
-//	static void FromHex(const string& in, unsigned char *out,
-//			size_t outLen) {
-//		memset(out, 0, outLen);
-//
-//		size_t inLen = in.size();
-//		inLen = std::min(inLen, outLen * 2);
-//
-//		const char * in_char = in.data();
-//		for (size_t i = 0; (i + 1) < inLen; i += 2) {
-//			out[i / 2] = (FromHex(in_char[i + 1]) & 0x0F)
-//					| ((FromHex(in_char[i]) << 4) & 0xF0);
-//		}
-//	}
-	
 	static void ToHexStr(const void* in, int inLen, char* out, int outLen,
-			bool upperCase = false) {
-		const uint8_t* p = (const uint8_t*) in;
-		inLen = std::min(inLen, outLen / 2);
-		for (int i = inLen - 1; i >= 0; --i) {
-			out[i * 2 + 1] = ToHex(p[i] & 0x0F, upperCase);
-			out[i * 2] = ToHex((p[i] >> 4) & 0x0F, upperCase);
-		}
-	}
+			bool upperCase = false); 
 
-	static string ToHexStr(const void* in, int inLen, bool upperCase = false) {
-		string hex;
-		hex.resize(inLen * 2);
+	static string ToHexStr(const void* in, int inLen, bool upperCase = false); 
 
-		const uint8_t* p = (const uint8_t*) in;
-		for (int i = inLen - 1; i >= 0; --i) {
-			hex.at(i * 2 + 1) = ToHex(p[i] & 0x0F, upperCase);
-			hex.at(i * 2) = ToHex((p[i] >> 4) & 0x0F, upperCase);
-		}
+	static void FromHexStr(const string& in, unsigned char *out, size_t outLen) ;
 
-		return hex;
-	}
-
-	static void FromHexStr(const string& in, unsigned char *out, size_t outLen) {
-		memset(out, 0, outLen);
-
-		size_t inLen = in.size();
-		inLen = std::min(inLen, outLen * 2);
-
-		const char * in_char = in.data();
-		for (size_t i = 0; (i + 1) < inLen; i += 2) {
-			out[i / 2] = (FromHex(in_char[i + 1]) & 0x0F)
-					| ((FromHex(in_char[i]) << 4) & 0xF0);
-		}
-	}
-
-	static void FromHexStr(const char *in, size_t inLen, unsigned char* out, size_t outLen) {
-		memset(out, 0, outLen);
-
-		if (inLen == (size_t) - 1) {
-			inLen = strlen(in);
-		}
-
-		inLen = std::min(inLen, outLen * 2);
-
-		for (size_t i = 0; (i + 1) < inLen; i += 2) {
-			out[i / 2] = (FromHex(in[i + 1]) & 0x0F)
-					| ((FromHex(in[i]) << 4) & 0xF0);
-		}
-	}
+	static void FromHexStr(const char *in, size_t inLen, unsigned char* out, size_t outLen) ;
 
 	// print binary in hex string way
 	static string HexDump(const void* data, int len, int lineLength = 16,
-			bool upperCase = true) {
-		string result;
-		if (data != NULL && len > 0) {
-			static const int c_LineSize = lineLength = 16 * 4;
-			static const int c_AsciiPos = lineLength = 16 * 3;
+			bool upperCase = true) ;
 
-			int lines = len / lineLength + len % lineLength ? 1 : 0;
-			char line[c_LineSize];
-			result.reserve((c_LineSize + 1) * lines);
+	static string& TrimLeft(string& str, const char* ch = ""); 
 
-			int pos = 0;
-			while (pos < len) {
-				memset(line, ' ', sizeof(line));
-				int step = std::min(lineLength = 16, len - pos);
-				for (int i = 0; i < step; ++i) {
-					line[i * 3] = ToHex(
-							(((const uint8_t*) data)[pos + i] >> 4) & 0x0F,
-							upperCase);
-					line[i * 3 + 1] = ToHex(
-							((const uint8_t*) data)[pos + i] & 0x0F, upperCase);
-					line[i * 3 + 2] = ' ';
-					line[c_AsciiPos + i] =
-							isprint(((const uint8_t*) data)[pos + i]) ?
-									((const uint8_t*) data)[pos + i] : '.';
-				}
+	static char* TrimLeft(char* str, size_t len, const char* ch = "") ;
 
-				if (!result.empty()) {
-					result.push_back('\n');
-				}
-				result.append(line, sizeof(line));
+	static string& TrimRight(string& str, const char* ch = "") ;
 
-				pos += step;
-			}
-		}
-		return result;
-	}
+	static char* TrimRight(char* str, size_t len, const char* ch = "") ;
 
-	static string& TrimLeft(string& str, const char* ch = "") {
-		size_t i = 0;
-		for (; i < str.size(); ++i) {
-			if (strchr(ch, str[i]) == NULL && !isspace(str[i])) {
-				break;
-			}
-		}
+	static string& Trim(string& str, const char* ch = "") ;
 
-		str.erase(0, i);
-		return str;
-	}
+	static char* Trim(char* str, size_t len, const char* ch = "") ;
 
-	static char* TrimLeft(char* str, size_t len, const char* ch = "") {
-		if (len == (size_t) - 1) {
-			len = strlen(str);
-		}
+	static char* MakeLower(char* str, int len = -1); 
 
-		size_t i = 0;
-		for (; i < len; ++i) {
-			if (strchr(ch, str[i]) == NULL && !isspace(str[i])) {
-				break;
-			}
-		}
+	static string& MakeUpper(string& str) ;
 
-		memmove(str, str + i, len - i);
-		return str;
-	}
-
-	static string& TrimRight(string& str, const char* ch = "") {
-		size_t i = str.size();
-		for (; i > 0; --i) {
-			if (strchr(ch, str[i - 1]) == NULL && !isspace(str[i - 1])) {
-				break;
-			}
-		}
-
-		str.erase(i);
-		return str;
-	}
-
-	static char* TrimRight(char* str, size_t len, const char* ch = "") {
-		size_t i = len == (size_t) - 1 ? strlen(str) : len;
-		for (; i > 0; --i) {
-			if (strchr(ch, str[i - 1]) == NULL && !isspace(str[i - 1])) {
-				break;
-			}
-		}
-
-		str[i] = 0;
-		return str;
-	}
-
-	static string& Trim(string& str, const char* ch = "") {
-		TrimLeft(str, ch);
-		TrimRight(str, ch);
-		return str;
-	}
-
-	static char* Trim(char* str, size_t len, const char* ch = "") {
-		TrimLeft(str, len, ch);
-		TrimRight(str, len, ch);
-		return str;
-	}
-
-	static char* MakeLower(char* str, int len = -1) {
-		if (len == -1) {
-			len = strlen(str);
-		}
-
-		for (int i = 0; i < len; ++i) {
-			if (isupper(str[i]))
-				str[i] = tolower(str[i]);
-		}
-
-		return str;
-	}
-
-	static string& MakeUpper(string& str) {
-		for (auto p = str.begin(); p != str.end(); ++p) {
-			if (islower(*p))
-				*p = toupper(*p);
-		}
-
-		return str;
-	}
-
-	static string& MakeLower(string& str) {
-		for (auto p = str.begin(); p != str.end(); ++p) {
-			if (isupper(*p))
-				*p = tolower(*p);
-		}
-
-		return str;
-	}
+	static string& MakeLower(string& str) ;
 
 	static int Compare(const void* s1, const void* s2, size_t len,
-			bool ignoreCase = false) {
-		if (ignoreCase) {
-			for (size_t i = 0; i < len; ++i) {
-				char ch1(tolower(((char*) s1)[i]));
-				char ch2(tolower(((char*) s2)[i]));
-				if (ch1 != ch2) {
-					return ch1 - ch2;
-				}
-			}
+			bool ignoreCase = false) ;
 
-			return 0;
-		} else {
-			return memcmp(s1, s2, len);
-		}
-	}
+	static bool StartsWith(const char* str, const char* substr,
+			bool ignoreCase = false) ;
 
-	static inline bool StartsWith(const char* str, const char* substr,
-			bool ignoreCase = false) {
-		return str != NULL && StartsWith(str, strlen(str), substr, ignoreCase);
-	}
+	static bool StartsWith(const char* str, size_t len,
+			const char* substr, bool ignoreCase = false) ;
 
-	static inline bool StartsWith(const char* str, size_t len,
-			const char* substr, bool ignoreCase = false) {
-		return str != NULL && substr != NULL
-				&& StartsWith(str, len, substr, strlen(substr), ignoreCase);
-	}
+	static bool StartsWith(const char* str, size_t len,
+			const char* substr, size_t subLen, bool ignoreCase = false) ;
 
-	static inline bool StartsWith(const char* str, size_t len,
-			const char* substr, size_t subLen, bool ignoreCase = false) {
-		if (str == 0 || substr == 0) {
-			return false;
-		}
+	static bool EndsWith(const char* str, const char* substr,
+			bool ignoreCase = false) ;
 
-		return len >= subLen && Compare(str, substr, subLen, ignoreCase) == 0;
-	}
+	static bool EndsWith(const char* str, size_t len, const char* substr,
+			bool ignoreCase = false) ;
 
-	static inline bool EndsWith(const char* str, const char* substr,
-			bool ignoreCase = false) {
-		return str != 0 && EndsWith(str, strlen(str), substr, ignoreCase);
-	}
+	static bool EndsWith(const char* str, size_t len, const char* substr,
+			size_t subLen, bool ignoreCase = false) ;
 
-	static inline bool EndsWith(const char* str, size_t len, const char* substr,
-			bool ignoreCase = false) {
-		return str != 0 && substr != 0
-				&& EndsWith(str, len, substr, strlen(substr), ignoreCase);
-	}
+	static bool Contains(const char* str, const char* substr,
+			bool ignoreCase = false) ;
 
-	static inline bool EndsWith(const char* str, size_t len, const char* substr,
-			size_t subLen, bool ignoreCase = false) {
-		if (str == 0 || substr == 0) {
-			return false;
-		}
+	static bool Contains(const string& str,
+			const string& substr, bool ignoreCase = false) ;
 
-		return len >= subLen
-				&& Compare(substr, str + len - subLen, subLen, ignoreCase) == 0;
-	}
+	static bool Contains(const char* str, size_t len, const char* substr,
+			bool ignoreCase = false) ;
 
-	static inline bool Contains(const char* str, const char* substr,
-			bool ignoreCase = false) {
-		return str != NULL && substr != NULL
-				&& Contains(str, strlen(str), substr, strlen(substr),
-						ignoreCase);
-	}
+	static bool Contains(const char* str, size_t len, const char* substr,
+			size_t subLen, bool ignoreCase = false) ;
 
-	static inline bool Contains(const string& str,
-			const string& substr, bool ignoreCase = false) {
-		return Contains(str.c_str(), substr.c_str(), ignoreCase);
-	}
-
-	static inline bool Contains(const char* str, size_t len, const char* substr,
-			bool ignoreCase = false) {
-		return substr != NULL
-				&& Contains(str, len, substr, strlen(substr), ignoreCase);
-	}
-
-	static inline bool Contains(const char* str, size_t len, const char* substr,
-			size_t subLen, bool ignoreCase = false) {
-		return Find(str, len, substr, subLen, ignoreCase) != NULL;
-	}
-
-	static inline char* Find(const char* str, const char* substr,
-			bool ignoreCase = false) {
-		if (str == NULL || substr == NULL) {
-			return NULL;
-		}
-
-		return Find(str, strlen(str), substr, strlen(substr), ignoreCase);
-	}
-
-	static inline char* Find(const char* str, size_t len, const char* substr,
-			bool ignoreCase = false) {
-		if (substr == NULL) {
-			return NULL;
-		}
-
-		return Find(str, len, substr, strlen(substr), ignoreCase);
-	}
+	static char* Find(const char* str, const char* substr,
+			bool ignoreCase = false) ;
 
 	static char* Find(const char* str, size_t len, const char* substr,
-			size_t subLen, bool ignoreCase) {
-		if (str == NULL || substr == NULL) {
-			return NULL;
+			bool ignoreCase = false) ;
+
+	static char* Find(const char* str, size_t len, const char* substr,
+			size_t subLen, bool ignoreCase) ;
+	
+	/**
+	 * 分割字符串
+	 * @template param T 支持T::insert(T::end(), std::string)方法的任意容器
+	 * @param output	输出分割后的结果数组
+	 * @param input		输入字符串
+	 * @param delim		分隔字符串
+	 * @param remove_empty	从输出结果中删除空白串
+	 * @param trim		去除每个字符串前后的空白
+	 * @return 返回结果数组output
+	 **/
+	template<typename T>
+	static T& StringSplit(
+		T& output,
+		const char* input,
+		const char* delim,
+		bool remove_empty = false,
+		bool trim = false)
+	{
+		if(input == 0 || *input == 0 || delim == 0 || *delim == 0)
+		{
+			return output;
 		}
 
-		if (subLen == 0) {
-			return (char*) str;
+		std::string str;
+		const char* start = input;
+		const char* p = 0;
+		while ((p = strstr(start, delim)) != 0)
+		{
+			if(!remove_empty || !IsNullOrSpace(start, p - start))
+			{
+				str.assign(start, p - start);
+				if(trim)
+				{
+					Trim(str);
+				}
+				
+				if(!remove_empty || !str.empty())
+				{
+					output.insert(output.end(), str);
+				}
+			}
+			start = p + strlen(delim);
 		}
 
-		const char* end = str + len - subLen + 1;
-		for (const char* cur = str; cur < end; ++cur) {
-			if (Compare(cur, substr, subLen, ignoreCase) == 0) {
-				return (char*) cur;
+		if (!remove_empty || !IsNullOrSpace(start))
+		{
+			str.assign(start);
+			if (trim)
+			{
+				Trim(str);
+			}
+			if(!remove_empty || !str.empty())
+			{
+				output.insert(output.end(), str);
 			}
 		}
-
-		return NULL;
+		return output;
 	}
+
+   	template<typename T>
+	static T& StringSplit(
+		T& output,
+		const std::string& input,
+		const char* delim,
+		bool remove_empty = false,
+		bool trim = false)
+    {
+        return StringSplit(output, input.c_str(), delim, remove_empty, trim);
+    }
+
+	/**
+	 * 拼接字符串
+	 * @param begin	起始位置
+	 * @param end	结束位置
+	 * @param separator	分隔符
+	 * @param fmt	元素格式化串
+	 * @return 返回拼接后的字符串
+	 **/
+	template<
+		typename Iterator,
+		typename TConv = StringJoinConvert<typename Iterator::value_type>
+	>
+	static std::string StringJoin(
+		Iterator begin,
+		Iterator end,
+		const char* separator,
+		const char* fmt = "%s",
+		TConv conv = TConv())
+	{
+		std::string result;
+		Iterator it = begin;
+		
+		//append first element
+		if(it != end)
+		{
+			AppendFormat(result, fmt, conv(*it));
+			++it;
+		}
+		
+		//append other element
+		for(; it != end; ++it)
+		{
+			result.append(separator);
+			AppendFormat(result, fmt, conv(*it));
+		}
+
+		return result;
+	}
+    
+	//specialized for array
+	template<
+		typename T,
+		typename TConv = StringJoinConvert<T>
+	>
+	static std::string StringJoin(
+		T* begin,
+		T* end,
+		const char* separator,
+		const char* fmt = "%s",
+		TConv conv = TConv())
+	{
+		return StringJoin<T*, TConv>(begin, end, separator, fmt, conv);
+	}
+
+	/**
+	 * 拼接字符串
+	 * @param cont	字符串所在容器
+	 * @param separator	分隔符
+	 * @param fmt	元素格式化串
+	 * @return 返回拼接后的字符串
+	 **/
+	template<
+		typename TContainer,
+		typename TConv = StringJoinConvert<typename TContainer::value_type>
+	>
+	static std::string StringJoin(
+		TContainer cont,
+		const char* separator,
+		const char* fmt = "%s",
+		TConv conv = TConv())
+	{
+		return StringJoin(cont.begin(), cont.end(), separator, fmt, conv);
+	}
+
+	//specialized for array
+	template<
+		class T,
+		size_t N,
+		typename TConv = StringJoinConvert<T>
+	>
+	static std::string StringJoin(
+		T (&cont)[N],
+		const char* separator,
+		const char* fmt = "%s",
+		TConv conv = TConv())
+	{
+		return StringJoin<T, TConv>(&cont[0], &cont[N], separator, fmt, conv);
+	}
+
 
 private:
-	static string& _AppendFormatV(string& str, const char* fmt, va_list ap) {
-		va_list cp;
-		va_copy(cp, ap);
-		int need_size = vsnprintf(0, 0, fmt, cp);
-		va_end(cp);
-		if (need_size < 0) {
-			return str;
-		}
-
-		int curr_size = (int) str.size();
-		str.resize(curr_size + need_size + 1);
-		int final_size = vsnprintf(&str[curr_size], need_size + 1, fmt, ap);
-		if (final_size > 0) {
-			curr_size += std::min(final_size, need_size);
-		}
-		str.resize(curr_size);
-
-		return str;
-	}
-	
-	static char ToHex(uint8_t num, bool upperCase = false) {
-		static const char* c_HexChars[] = { "0123456789abcdef",
-				"0123456789ABCDEF" };
-		return c_HexChars[(int) upperCase][num & 0x0F];
-	}
-
-	static uint8_t FromHex(char ch) {
-		if (ch >= '0' && ch <= '9') {
-			return ch - '0';
-		} else if (ch >= 'a' && ch <= 'f') {
-			return ch - 'a' + 10;
-		} else if (ch >= 'A' && ch <= 'F') {
-			return ch - 'A' + 10;
-		} else {
-			return 0;
-		}
-	}
+	static string& _AppendFormatV(string& str, const char* fmt, va_list ap); 
+	static char ToHex(uint8_t num, bool upperCase = false);
+	static uint8_t FromHex(char ch);
 };
 
 }

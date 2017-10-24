@@ -32,106 +32,27 @@ namespace Base {
 
 class TimeUtil {
 public:
-	static int SetSysTime(time_t time) {
-		struct timeval tv;
-		tv.tv_sec = time;
-		tv.tv_usec = 0;
-		if (settimeofday(&tv, (struct timezone *) 0) < 0) {
-			printf("[Time] error: set system datatime error!/n");
-			return -1;
-		}
-		return 0;
-	}
-
-	static time_t Str2Time(const char * szTime) {
-		tm tm_;
-		if (NULL == strptime(szTime, "%Y-%m-%d %H:%M:%S", &tm_))
-			return 0;
-
-		tm_.tm_isdst = -1;
-		return mktime(&tm_);
-	}
-
-	static time_t Str2Time(const char * szTime, const char * fmt) {
-		tm tm_;
-		if (NULL == strptime(szTime, fmt, &tm_))
-			return 0;
-
-		tm_.tm_isdst = -1;
-		return mktime(&tm_);
-	}
-
-	static string Time2Str(time_t time) {
-		struct tm tm_now;
-		char datetime[200] = { "0" };
-
-		localtime_r(&time, &tm_now);
-		strftime(datetime, 200, "%Y-%m-%d %H:%M:%S", &tm_now);
-
-		string time_str(datetime);
-		return time_str;
-	}
-
-	static string Time2Str(time_t time, const char * fmt) {
-		struct tm tm_now;
-		char datetime[200] = { "0" };
-
-		localtime_r(&time, &tm_now);
-		strftime(datetime, 200, fmt, &tm_now);
-
-		string time_str(datetime);
-		return time_str;
-	}
+	static int SetSysTime(time_t time); 
+	static time_t Str2Time(const char * szTime);  
+	static time_t Str2Time(const char * szTime, const char * fmt);  
+	static string Time2Str(time_t time);  
+	static string Time2Str(time_t time, const char * fmt);  
 };
 
 class TimeMgr
 {
 public:
-	static TimeMgr * Instance() {
-		static TimeMgr instance;
-		return &instance;
-	}
-
-	void Sync(time_t newtime) {
-		_mutex.lock();
-		_boot_time += newtime - time(NULL);
-		_synced = true;
-		Base::TimeUtil::SetSysTime(newtime);
-		_mutex.unlock();
-	}
-
-	static time_t NowFromBoot() {
-		struct timespec time1 = {0, 0};
-		clock_gettime(CLOCK_MONOTONIC, &time1);
-		return time1.tv_sec;
-	}
-
-	time_t BootTime() {
-		return _boot_time;
-	}
-
-	bool Synced() {
-		return _synced;
-	}
-
-	time_t Now() {
-		return Synced() ? time(NULL) : 0;
-	}
+	static TimeMgr * Instance(); 
+	
+	void Sync(time_t newtime); 
+	static time_t NowFromBoot(); 
+	time_t BootTime(); 
+	bool Synced(); 
+	time_t Now(); 
 
 private:
-	TimeMgr() : _synced(false), _boot_time(0) {
-		Init();
-	}
-
-	void Init() {
-		struct sysinfo info;
-		if (0 == sysinfo(&info)) {
-			time_t cur_time = time(NULL);
-			_boot_time = (cur_time > info.uptime) ? cur_time - info.uptime : info.uptime - cur_time;
-		}
-		else
-			fprintf(stderr, "failed to get sysinfo, errno:%s\n", strerror(errno));
-	}
+	TimeMgr();
+	void Init(); 
 
 	PthreadMutex _mutex;
 	bool _synced;

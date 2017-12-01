@@ -1,25 +1,24 @@
 # Makefile
+include ./config.mk
 
 OUT=./lib/libbase.a
+OUT_SO=./lib/libbase.so
 
 OBJ=$(shell find . ! -path "./test/*" ! -path "./3rd/*" | grep -E '\.(c|cpp)$$' | sed -r s/[^.]+$$/o/)
 SRC=$(shell find . ! -path "./test/*" ! -path "./3rd/*" | grep -E '\.(c|cpp)$$')
 
-ifeq ($(ARCH),arm)
-CC=arm-fsl-linux-gnueabi-g++
-AR=arm-fsl-linux-gnueabi-ar
-LDFLAGS=  -Wl,-dn -lsqlite -L../3rd/lib_arm
-else
-CC= g++
-AR=ar
-LDFLAGS=  -Wl,-dn -lsqlite -L../3rd/lib_x64
-endif
-
-CFLAGS= -I./include -I./3rd/sqlite -std=c++0x -fPIC -Wdeprecated-declarations
+CC=${CROSS_COMPILE}g++
+AR=${CROSS_COMPILE}ar
+CFLAGS+= -I./include
+CFLAGS+= -I./3rd/sqlite/install/include
+CFLAGS+= -I./3rd/openssl/install/include 
+CFLAGS+= -std=c++0x -fPIC -Wdeprecated-declarations
+LDFLAGS+=  -Wl,-dn -lsqlite -L./3rd/sqlite/install/lib 
+LDFLAGS+=  -Wl,-dy -ldl
 
 OUT:$(OBJ)
 	$(AR) cr $(OUT) ./src/*.o
-#	$(CC) -shared -fPIC *.c -I./include -o libbase.so
+	$(CC) -shared -fPIC ${OBJ} ${LDFLAGS} -o ${OUT_SO}
 
 OBJ:$(SRC)
 	$(CC) $(CFLAGS) -o $(OBJ) -c $^
@@ -29,4 +28,4 @@ OBJ:$(SRC)
 
 .PHONY:clean
 clean:
-	-$(RM) $(OBJ) $(OUT)
+	-$(RM) $(OBJ) $(OUT) ${OUT_SO}

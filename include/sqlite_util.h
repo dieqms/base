@@ -10,7 +10,6 @@
 
 #include <sqlite3.h>
 #include <string>
-#include "thread_util.h"
 using std::string;
 
 namespace Base {

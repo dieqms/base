@@ -7,15 +7,9 @@
 
 #ifndef _THREAD_UTIL_H_
 #define _THREAD_UTIL_H_
-#include <sys/time.h>
-#include <sys/types.h>
 #include <sys/syscall.h>  
-#include <inttypes.h>
-#include <unistd.h>
 #include <pthread.h>
 #include <string>
-#include <stdio.h>
-#include <limits.h>
 #include <errno.h>
 
 namespace Base {

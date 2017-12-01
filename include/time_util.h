@@ -8,22 +8,8 @@
 #ifndef TIME_UTIL_H_
 #define TIME_UTIL_H_
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
 #include <string>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/time.h>
-#include <assert.h>
-#include <sys/sysinfo.h>
-#include "string_util.h"
 #include "thread_util.h"
 
 using std::string;

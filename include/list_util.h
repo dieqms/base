@@ -2,9 +2,6 @@
 #define _LIST_UTIL_H
 
 #include<iostream>
-#include<string>
-#include<assert.h>
-using namespace std;
 
 namespace Base {
 

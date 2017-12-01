@@ -1,24 +1,21 @@
 # Makefile
+include ../../config.mk
 
-EXE=./libsqlite.a
+OUT=./install/lib/libsqlite.a
+OUT_SO=./install/lib/libsqlite.so
 
 OBJ=$(shell find . | grep -E '\.(c|cpp)$$' | sed -r s/[^.]+$$/o/)
 SRC=$(shell find . | grep -E '\.(c|cpp)$$')
 
-ifeq ($(ARCH),arm)
-CC=arm-fsl-linux-gnueabi-gcc
-AR=arm-fsl-linux-gnueabi-ar
-else
-CC= gcc
-AR=ar
-endif
+CC=${CROSS_COMPILE}gcc
+AR=${CROSS_COMPILE}ar
 
-CFLAGS= -I./include -fPIC -Wdeprecated-declarations
-LDFLAGS=  
+CFLAGS+= -fPIC -Wdeprecated-declarations
+LDFLAGS+=  
 
-EXE:$(OBJ)
-	$(AR) cr libsqlite.a *.o
-	$(CC) -shared -fPIC *.c -I./include -o libsqlite.so
+OUT:$(OBJ)
+	$(AR) cr ${OUT} *.o
+	$(CC) -shared -fPIC ${OBJ} ${LDFLAGS} -o ${OUT_SO}
 
 OBJ:$(SRC)
 	$(CC) $(CFLAGS) -o $(OBJ) -c $^
@@ -28,4 +25,4 @@ OBJ:$(SRC)
 
 .PHONY:clean
 clean:
-	-$(RM) $(OBJ) $(EXE)
+	-$(RM) $(OBJ) $(OUT) ${OUT_SO}

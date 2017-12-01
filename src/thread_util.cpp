@@ -4,7 +4,9 @@
  *  Created on: 2017年10月24日
  *      Author: LJT
  */
-
+#include <stdio.h>
+#include <sys/time.h>
+#include <limits.h>
 #include "thread_util.h"
 
 namespace Base {

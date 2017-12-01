@@ -8,19 +8,6 @@
 #ifndef COMMON_TIMER_H_
 #define COMMON_TIMER_H_
 
-#include <sys/types.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <sys/epoll.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <sys/timerfd.h>
-#include <unistd.h>
-#include <pthread.h>
 #include <map>
 #include <list>
 #include "thread_util.h"

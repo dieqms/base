@@ -5,7 +5,7 @@
  *      Author: LJT
  */
 
-
+#include <string.h>
 #include "timer_util.h"
 
 namespace Base {

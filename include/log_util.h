@@ -9,9 +9,13 @@
 #define LOG_UTIL_H_
 
 #include <assert.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <stdarg.h>
+#include <string.h>
 #include <string>
-#include <base.h>
+#include "base.h"
 #include "string_util.h"
 #include "thread_util.h"
 

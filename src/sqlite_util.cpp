@@ -5,6 +5,7 @@
  *      Author: LJT
  */
 
+#include <stdio.h>
 #include "sqlite_util.h"
 
 namespace Base {

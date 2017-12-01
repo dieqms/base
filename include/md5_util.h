@@ -9,7 +9,7 @@
 #define COMMON_MD5_UTIL_H_
 
 #include <string>
-using namespace std;
+using std::string;
 
 namespace Base {
 /*!

@@ -75,6 +75,10 @@ void Logger::Print(int level, const char* fmt, ...) {
 	_mutex.unlock();
 }
 
+void Logger::SetHook(LogerHook hook) {
+	_hook = hook;
+}
+
 Logger::Logger() {
 	_Init();
 }
@@ -156,6 +160,15 @@ void Logger::_DoPrintV(int level, const char* fmt, va_list args) {
 	vfprintf(_fp, fmt, args);
 
 	fflush(_fp);
+	
+	if (_hook) {
+		char * buffer = new char[1024];
+		int ret = vsprintf(buffer, fmt, args); 
+		if (ret) {
+			_hook(buffer);
+		}
+		delete []buffer;
+	}
 	
 	return;
 }

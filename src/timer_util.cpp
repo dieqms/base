@@ -5,6 +5,7 @@
  *      Author: LJT
  */
 
+#include <unistd.h>
 #include <string.h>
 #include "timer_util.h"
 

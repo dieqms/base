@@ -5,6 +5,7 @@
  *      Author: LJT
  */
 #include <stdio.h>
+#include <unistd.h>
 #include <errno.h>
 #include <sys/sysinfo.h>
 #include <string.h>

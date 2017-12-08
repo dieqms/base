@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include <limits.h>
+#include <unistd.h>
+#include <sys/syscall.h>   /* For SYS_xxx definitions */
 #include "thread_util.h"
 
 namespace Base {

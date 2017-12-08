@@ -32,6 +32,8 @@ namespace Base {
 #define PRINT_INFO(fmt, args...) \
 		Base::Logger::Instance()->Print(Base::Logger::LOG_INFO, fmt, ##args)
 
+typedef void (*LogerHook)(const char* info);
+
 class Logger {
 public:
 	typedef enum _LogLevel {
@@ -53,6 +55,7 @@ public:
 	void SetLevel(LogLevel level); 
 	void SetMaxSize(uint64_t max_size); 
 	void Print(int level, const char* fmt, ...); 
+	void SetHook(LogerHook hook);
 
 private:
 	Logger(); 
@@ -73,6 +76,7 @@ private:
 	LogLevel 	_level;
 	uint64_t 	_max_size;
 	PthreadMutex _mutex;
+	LogerHook   _hook;
 };
 
 }

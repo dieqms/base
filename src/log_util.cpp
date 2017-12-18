@@ -162,12 +162,8 @@ void Logger::_DoPrintV(int level, const char* fmt, va_list args) {
 	fflush(_fp);
 	
 	if (_hook) {
-		char * buffer = new char[1024];
-		int ret = vsprintf(buffer, fmt, args); 
-		if (ret) {
-			_hook(buffer);
-		}
-		delete []buffer;
+		string output = Base::StringUtil::Format(fmt, args);
+		_hook(output.c_str());
 	}
 	
 	return;

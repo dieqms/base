@@ -4,8 +4,8 @@
  *  Created on: 2017年10月24日
  *      Author: LJT
  */
-#include <stdio.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <errno.h>
 #include <sys/sysinfo.h>
 #include <string.h>

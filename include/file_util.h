@@ -9,10 +9,14 @@
 #define FILE_UTIL_H_
 
 #include <string>
+#include <set>
+#include <list>
 #include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
+#include <sys/inotify.h>
 #include "string_util.h"
+#include "thread_util.h"
 
 using std::string;
 
@@ -48,6 +52,27 @@ class DirUtil {
 public:
 	static bool CreateDirectory(const char* path, mode_t mode = 0777);
 };
+
+class FileMonitor: public Pthread {
+public:
+    typedef void (*ListenerCb)(const string & path, const string & file, uint32_t event, void * cookie);
+    FileMonitor(const string & dir, ListenerCb cb = NULL, void *cookie = NULL);
+    virtual ~FileMonitor();
+    void Monitor(const string & file);
+    bool Start();
+	
+private:
+	virtual void runner(void * var);
+	void _Process(int fd);
+
+	int 				_fd;
+	std::list<int> 		_watch_fds;
+	string	   			_dir;
+	std::set<string> 	_files;
+	ListenerCb 			_cb;
+    void * 	   			_cookie;
+};
+
 
 }
 

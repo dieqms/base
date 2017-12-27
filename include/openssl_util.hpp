@@ -63,7 +63,7 @@ public:
 	    return encrypted;
 	}
 
-        static std::string AesDecrypt(uint8_t * data, int data_len, const char* key)
+    static std::string AesDecrypt(uint8_t * data, int data_len, const char* key)
 	{
 	    char key_adjust[16] = {0};
 	    strcpy(key_adjust, key);
@@ -106,7 +106,91 @@ public:
 
 	    return encrypted;
 	}
+        
+	static std::string AesCBCEncrypt(uint8_t * data, int data_len, const char* key, unsigned char iv[AES_BLOCK_SIZE])
+	{
+		char key_adjust[16] = {0};
+		int key_len = strlen(key);
+		memcpy(key_adjust, key, key_len < 16 ? key_len : 16);
+		
+		unsigned char iv_adjust[16] = {0};
+		int iv_len = strlen((const char*)iv);
+		memcpy(iv_adjust, iv, iv_len < 16 ? iv_len : 16);
+
+		int len = data_len % AES_BLOCK_SIZE ? (data_len/AES_BLOCK_SIZE + 1) * AES_BLOCK_SIZE : data_len;
+		char * buffer_in = new char[len + 1];
+		char * buffer_out = new char[len + 1];
+
+		memset(buffer_in, 0, len);
+		memset(buffer_out, 0, len);
+
+		char * in = buffer_in;
+		char * out = buffer_out;
+		memcpy(in, data, data_len);
+		
+		AES_KEY aes;
+		if(AES_set_decrypt_key((unsigned char*)key_adjust, 128, &aes) < 0)
+		{
+			return "";
+		}
+		    
+		AES_cbc_encrypt((unsigned char*)in, (unsigned char*)out, len, &aes, iv_adjust, AES_ENCRYPT);
+		std::string encrypted;
+		encrypted.assign(buffer_out, len);
+
+//	    printf(">>>>aes_decrypt: \n");
+//	    printf("pass: %s\n", key);
+//	    printf("ori: %s\n", Base::StringUtil::HexDump(buffer_in, len).c_str());
+//	    printf("decrypted: %s\n", Base::StringUtil::HexDump(encrypted.c_str(), encrypted.size()).c_str());
+
+		delete [] buffer_in;
+		delete [] buffer_out;
+
+		return encrypted;
+	}
 	
+	static std::string AesCBCDecrypt(uint8_t * data, int data_len, const char* key, unsigned char iv[AES_BLOCK_SIZE])
+	{
+		char key_adjust[16] = {0};
+		int key_len = strlen(key);
+		memcpy(key_adjust, key, key_len < 16 ? key_len : 16);
+		
+		unsigned char iv_adjust[16] = {0};
+		int iv_len = strlen((const char*)iv);
+		memcpy(iv_adjust, iv, iv_len < 16 ? iv_len : 16);
+
+		int len = data_len % AES_BLOCK_SIZE ? (data_len/AES_BLOCK_SIZE + 1) * AES_BLOCK_SIZE : data_len;
+		char * buffer_in = new char[len + 1];
+		char * buffer_out = new char[len + 1];
+
+		memset(buffer_in, 0, len);
+		memset(buffer_out, 0, len);
+
+		char * in = buffer_in;
+		char * out = buffer_out;
+		memcpy(in, data, data_len);
+		
+		AES_KEY aes;
+		if(AES_set_decrypt_key((unsigned char*)key_adjust, 128, &aes) < 0)
+		{
+			return "";
+		}
+			
+		AES_cbc_encrypt((unsigned char*)in, (unsigned char*)out, len, &aes, iv_adjust, AES_DECRYPT);
+		std::string decrypted;
+		decrypted.assign(buffer_out, len);
+
+//	    printf(">>>>aes_decrypt: \n");
+//	    printf("pass: %s\n", key);
+//	    printf("ori: %s\n", Base::StringUtil::HexDump(buffer_in, len).c_str());
+//	    printf("decrypted: %s\n", Base::StringUtil::HexDump(encrypted.c_str(), encrypted.size()).c_str());
+
+		delete [] buffer_in;
+		delete [] buffer_out;
+
+		return decrypted;
+	}
+        
 	static char * Base64Encode(const char * input, int length, bool with_new_line = false)
 	{
 		BIO * bmem = NULL;

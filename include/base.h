@@ -8,6 +8,7 @@
 #ifndef _UTIL_BASE_H_
 #define _UTIL_BASE_H_
 
+#include "string_util.h"
 #include "time_util.h"
 #include "number_util.h"
 #include "file_util.h"

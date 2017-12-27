@@ -5,8 +5,8 @@
  *      Author: LJT
  */
 
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 #include "timer_util.h"
 
 namespace Base {

@@ -510,5 +510,122 @@ namespace Base {
 		return true;
 	}
 
+#define EVENT_SIZE  ( sizeof (struct inotify_event) )  
+#define BUF_LEN     ( 1024 * ( EVENT_SIZE + 16 ) )  
+#define MAXLEN 1024  
+	
+	FileMonitor::FileMonitor(const string & dir, ListenerCb cb, void *cookie) : Pthread(NULL, NULL, "FileMonitor") {
+		_fd = -1;
+		_dir = dir;
+		_cb = cb;
+		_cookie = cookie;
+	}
+	
+	FileMonitor::~FileMonitor() {
+		if (_fd != -1) {
+			for (auto iter = _watch_fds.begin(); iter != _watch_fds.end(); ++iter)
+				inotify_rm_watch(_fd, *iter);
+			close(_fd);
+		}
+	}
+	
+	void FileMonitor::Monitor(const string & file) {
+		_files.insert(file);
+	}
+	
+	bool FileMonitor::Start() {
+		system(Base::StringUtil::Format("mkdir %s", _dir.c_str()).c_str());
+			
+		_fd = inotify_init();  
+		if (_fd < 0) {
+			perror("inotify_init");
+			return false;
+		}
+		
+		int wd = inotify_add_watch(_fd, _dir.c_str(), IN_MODIFY | IN_CREATE | IN_DELETE);
+		_watch_fds.push_back(wd);
+		
+		for (auto iter = _files.begin(); iter != _files.end(); ++iter) {
+			wd = inotify_add_watch(_fd, iter->c_str(), IN_MODIFY | IN_CREATE | IN_DELETE);
+			_watch_fds.push_back(wd);
+		}
+		
+		start();
+		
+		return true;
+	}
+	
+	void FileMonitor::runner(void * var) {
+		fd_set set;  
+		fd_set rset;  
+		int check_set[MAXLEN];  
+		int max_fd = 0;  
+		int arrlen = 0;  
+		
+		//初始化  
+		FD_ZERO(&rset);
+		int i = 0;
+		for (i = 0; i < MAXLEN; ++i)
+			check_set[i] = -1;
+		
+		//添加监控fd  
+		FD_SET(_fd, &rset);
+		check_set[arrlen++] = _fd;
+
+		if (max_fd < _fd)
+			max_fd = _fd;
+		
+		while (is_run()) {
+			set = rset;
+			int nready = select(max_fd + 1, &set, NULL, NULL, NULL);
+			if (nready == -1) {
+				perror("error select !");
+				exit(-1);
+			}
+			else if (nready == 0) {
+				printf("timeout!");
+				continue;
+			}
+			
+			for (int i = 0; i < arrlen; ++i) //轮询数据连接  
+			{
+				int set_fd = check_set[i];
+				if (FD_ISSET(set_fd, &set)) {
+					_Process(set_fd);
+				}
+			}
+		}
+	}
+	
+	void FileMonitor::_Process(int fd) {
+		char buffer[BUF_LEN];
+		int length = read(fd, buffer, BUF_LEN);
+		if (length < 0) {
+			perror("read");
+		}
+		
+		int i = 0;
+		while (i < length) {
+			struct inotify_event *event = (struct inotify_event *) &buffer[i];
+			if (event->len) {
+				auto iter = _files.find(event->name);
+				if (iter != _files.end()) {
+					if (_cb)
+						_cb(_dir, *iter, event->mask, _cookie);
+				}
+			}
+			else {
+				auto iter = _files.find(event->name);
+				if (iter != _files.end()) {
+					if (_cb)
+						_cb(_dir, *iter, event->mask, _cookie);
+				}
+			}
+			i += EVENT_SIZE + event->len;
+		}
+		
+		memset(buffer, 0, BUF_LEN);
+	}
+
 }
 

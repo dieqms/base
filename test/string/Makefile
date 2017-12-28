@@ -8,7 +8,7 @@ SRC=$(shell find . | grep -E '\.(c|cpp)$$')
 CFLAGS= -g -I../../include -std=c++0x -Wno-psabi 
 
 
-LDFLAGS= -Wl,-dn -Wl,-dy
+LDFLAGS= -Wl,-dn -Wl,-dy -L./ -lbase -lrt
 #LDFLAGS= -Wl,-dn -ljsoncpp -Wl,-dy
 #LDFLAGS= 
 #LDFLAGS= -WI,-Bdynamic -lpthread -Wdeprecated-declarations -WI,-Bstatic -ljsoncpp
@@ -16,7 +16,7 @@ LDFLAGS= -Wl,-dn -Wl,-dy
 #CFLAGS= -g -std=c++0x -I../common
 #LDFLAGS= -lpthread
 
-CC=arm-none-linux-gnueabi-g++
+CC=g++
 LDFLAGS+= -L../3rd/lib
 
 EXE:$(OBJ)

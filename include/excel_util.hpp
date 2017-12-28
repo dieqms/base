@@ -20,8 +20,7 @@ public:
     }
 
     ~ExcelWriter() {
-        if (workbook)
-            workbook_close(workbook);
+    	Close();
     }
 
     bool Open(const char* book, const char * sheet) {
@@ -47,6 +46,18 @@ public:
 
     bool Write(int row, int col, int val) {
     	return LXW_NO_ERROR == worksheet_write_number(worksheet, row, col, val, NULL) ? true : false;
+    }
+    
+    bool Close() {
+    	bool ret = true;
+    	
+    	 if (workbook) {
+    		 ret = LXW_NO_ERROR == workbook_close(workbook) ? true : false;
+    		 workbook = NULL;
+    		 worksheet = NULL;
+    	 }
+    	 
+    	 return ret;
     }
 
 private:

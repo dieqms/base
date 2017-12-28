@@ -22,16 +22,16 @@ namespace Base {
 			sqlite3_free_table(_data - _col);
 			_data = NULL;
 		}
+		_row = 0;
+		_col = 0;
 	}
 
 	string SqliteData::Item(int row, int col) {
 		string data = "";
-		if (row < _row && col < _col && _data[row * _col + col] != NULL)
+		if (row < _row && col < _col && _data && _data[row * _col + col] != NULL)
 			data = _data[row * _col + col];
 		return data;
 	}
-
-	
 	
 	SqliteUtil::SqliteUtil(string path) {
 		_path = path;
@@ -89,6 +89,7 @@ namespace Base {
 
 		result = sqlite3_get_table(_conn, sql.c_str(), &data, &nRow, &nColumn, &errmsg);
 		if( SQLITE_OK == result ) {
+			sqlite_data.Free();
 			sqlite_data._data = data + nColumn;
 			sqlite_data._row = nRow;
 			sqlite_data._col = nColumn;

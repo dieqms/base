@@ -13,18 +13,18 @@ namespace Base {
 
 #define GET_UINT32(n,b,i)                        	\
 {                                              		\
-    (n) = (uint32) ((uint8 *) b)[(i)]            	\
-      | (((uint32) ((uint8 *) b)[(i)+1]) <<  8)   	\
-      | (((uint32) ((uint8 *) b)[(i)+2]) << 16)   	\
-      | (((uint32) ((uint8 *) b)[(i)+3]) << 24);  	\
+    (n) = (uint32_t) ((uint8_t *) b)[(i)]            	\
+      | (((uint32_t) ((uint8_t *) b)[(i)+1]) <<  8)   	\
+      | (((uint32_t) ((uint8_t *) b)[(i)+2]) << 16)   	\
+      | (((uint32_t) ((uint8_t *) b)[(i)+3]) << 24);  	\
 }
 
 #define PUT_UINT32(n,b,i)                                    	\
 {                                                            	\
-    (((uint8 *) b)[(i)]  ) = (uint8) (((n)      ) & 0xFF);   	\
-    (((uint8 *) b)[(i)+1]) = (uint8) (((n) >>  8) & 0xFF);      \
-    (((uint8 *) b)[(i)+2]) = (uint8) (((n) >> 16) & 0xFF);     	\
-    (((uint8 *) b)[(i)+3]) = (uint8) (((n) >> 24) & 0xFF);     	\
+    (((uint8_t *) b)[(i)]  ) = (uint8_t) (((n)      ) & 0xFF);   	\
+    (((uint8_t *) b)[(i)+1]) = (uint8_t) (((n) >>  8) & 0xFF);      \
+    (((uint8_t *) b)[(i)+2]) = (uint8_t) (((n) >> 16) & 0xFF);     	\
+    (((uint8_t *) b)[(i)+3]) = (uint8_t) (((n) >> 24) & 0xFF);     	\
 }
 
 //extern pthread_mutex_t mutexMemory;
@@ -39,9 +39,9 @@ void Md5Util::md5_starts( struct md5_context *ctx )
     ctx->state[3] = 0x10325476;
 }
 
-void Md5Util::md5_process( struct md5_context *ctx, uint8 data[64] )
+void Md5Util::md5_process( struct md5_context *ctx, uint8_t data[64] )
 {
-    uint32 A, B, C, D, X[16];
+    uint32_t A, B, C, D, X[16];
 
     GET_UINT32( X[0],  data,  0 );
     GET_UINT32( X[1],  data,  4 );
@@ -162,9 +162,9 @@ void Md5Util::md5_process( struct md5_context *ctx, uint8 data[64] )
     ctx->state[3] += D;
 }
 
-void Md5Util::md5_update( struct md5_context *ctx, uint8 *input, uint32 length )
+void Md5Util::md5_update( struct md5_context *ctx, uint8_t *input, uint32_t length )
 {
-    uint32 left, fill;
+    uint32_t left, fill;
 
     if( ! length ) return;
 
@@ -199,7 +199,7 @@ void Md5Util::md5_update( struct md5_context *ctx, uint8 *input, uint32 length )
     }
 }
 
-static uint8 md5_padding[64] =
+static uint8_t md5_padding[64] =
 {
  0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -207,10 +207,10 @@ static uint8 md5_padding[64] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-void Md5Util::md5_finish( struct md5_context *ctx, uint8 digest[16] )
+void Md5Util::md5_finish( struct md5_context *ctx, uint8_t digest[16] )
 {
-    uint32 last, padn;
-    uint8 msglen[8];
+    uint32_t last, padn;
+    uint8_t msglen[8];
 
     PUT_UINT32( ctx->total[0], msglen, 0 );
     PUT_UINT32( ctx->total[1], msglen, 4 );

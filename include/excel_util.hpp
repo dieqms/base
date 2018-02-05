@@ -5,8 +5,8 @@
  *      Author: LJT
  */
 
-#ifndef SRC_3RD_INCLUDE_BASE_BASE_EXCEL_UTIL_H_
-#define SRC_3RD_INCLUDE_BASE_BASE_EXCEL_UTIL_H_
+#ifndef _EXCEL_UTIL_H_
+#define _EXCEL_UTIL_H_
 
 #include "xlsxwriter.h"
 

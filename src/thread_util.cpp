@@ -211,36 +211,43 @@ namespace Base {
 	void PthreadMutex::broadcast() {
 		pthread_cond_broadcast(&_cond);
 	}
+	
+	PthreadMutex Pthread::mutex;
+	std::list<PthreadInfo> Pthread::pthread_list;
 
 	Pthread::Pthread(runner_t runner, void * args, std::string name) :
-			_runner(runner), args(args) {
-		thread_name = name;
-		thread_handle = 0;
-		running = false;
+			_runner(runner), _args(args) {
+		_thread_name = name;
+		_thread_handle = 0;
+		_running = false;
 	}
 
 	Pthread::~Pthread() {
 		stop();
 		join();
 	}
+	
+	void Pthread::set_stacksize(size_t stacksize) {
+		_stacksize = stacksize;
+		_stacksize = (_stacksize < PTHREAD_STACK_MIN) ? PTHREAD_STACK_MIN : _stacksize;
+	}
 
 	bool Pthread::start(size_t stacksize) {
-		stacksize =
-				(stacksize < PTHREAD_STACK_MIN) ? PTHREAD_STACK_MIN : stacksize;
+		set_stacksize(stacksize);
 
 		pthread_attr_t attr;
-		if (!running) {
-			running = true;
+		if (!_running) {
+			_running = true;
 			if (pthread_attr_init(&attr)
-					|| pthread_attr_setstacksize(&attr, stacksize)) {
+					|| pthread_attr_setstacksize(&attr, _stacksize)) {
 				size_t get = 0;
 				pthread_attr_getstacksize(&attr, &get);
 				printf("[Pthread] error: set stacksize fail, set %zu get %zu\n",
-						stacksize, get);
+						_stacksize, get);
 			}
 			pthread_attr_destroy(&attr);
-			if (pthread_create(&thread_handle, &attr, loop, this) != 0) {
-				printf("failed to create thread (%s)\n", thread_name.c_str());
+			if (pthread_create(&_thread_handle, &attr, loop, this) != 0) {
+				printf("failed to create thread (%s)\n", _thread_name.c_str());
 				return false;
 			}
 		}
@@ -248,28 +255,46 @@ namespace Base {
 	}
 
 	void Pthread::join() {
-		if (thread_handle) {
-			pthread_join(thread_handle, NULL);
-			thread_handle = 0;
+		if (_thread_handle) {
+			pthread_join(_thread_handle, NULL);
+			_thread_handle = 0;
 		}
 	}
 
 	void Pthread::stop(bool with_block) {
-		if (running) {
-			running = false;
+		if (_running) {
+			_running = false;
 			if (with_block)
 				join();
 		}
 	}
 
 	bool Pthread::is_run() {
-		return running;
+		return _running;
 	}
 
-	unsigned int Pthread::get_tid()
-	{
+	unsigned int Pthread::get_tid() {
 //		syscall(SYS_gettid) 
 		return syscall(__NR_gettid);
+	}
+	
+	void Pthread::dump() {
+		mutex.lock();
+		printf("#### Pthread Dump ####\n");
+		int i = 0;
+		for (auto iter = pthread_list.begin(); iter != pthread_list.end(); ++iter) {
+			printf("  %d [%d] %s - stack %zd\n", ++i, iter->id, iter->name.c_str(), iter->stack_size);
+		}
+		printf("#### Pthread Dump End ####\n");
+		mutex.unlock();
+	}
+	
+	std::string Pthread::name() {
+		return _thread_name;
+	}
+	
+	pthread_t Pthread::handle() {
+		return _thread_handle;
 	}
 
 	void Pthread::runner(void * var) {
@@ -279,10 +304,29 @@ namespace Base {
 
 	void * Pthread::loop(void * var) {
 		Pthread* p_thread = (Pthread*) var;
-		p_thread->runner(p_thread->args);
+		unsigned int id = p_thread->get_tid();
+		
+		PthreadInfo info;
+		mutex.lock();
+		info.id = id;
+		info.name = p_thread->name();
+		info.stack_size = p_thread->_stacksize;
+		pthread_list.push_back(info);
+		mutex.unlock();
+		
+		p_thread->runner(p_thread->_args);
 
-		p_thread->running = false;
-		p_thread->thread_handle = 0;
+		p_thread->_running = false;
+		p_thread->_thread_handle = 0;
+		
+		mutex.lock();
+		for (auto iter = pthread_list.begin(); iter != pthread_list.end(); ++iter) {
+			if (iter->id == id) {
+				pthread_list.erase(iter);
+				break;
+			}
+		}
+		mutex.unlock();
 
 		return NULL;
 	}

@@ -71,7 +71,7 @@ namespace Base {
 		char * errmsg = NULL;
 		ret = sqlite3_exec( _conn, sql.c_str(), 0, 0, &errmsg );
 		if(ret != SQLITE_OK ) {
-			printf("[SqliteUtil] sqlite3_exec error: %s, sql: %s\n", errmsg, sql.c_str());
+			printf("[SqliteUtil] %s sqlite3_exec error: %s, sql: %s\n", _path.c_str(), errmsg, sql.c_str());
 			return false;
 		}
 		return true;
@@ -95,7 +95,7 @@ namespace Base {
 			sqlite_data._col = nColumn;
 		}
 		else {
-			printf("[SqliteUtil] sqlite3_get_table error: %s\n", errmsg);
+			printf("[SqliteUtil] %s sqlite3_get_table error: %s\n", _path.c_str(), errmsg);
 		}
 		return nRow;
 	}

@@ -14,6 +14,7 @@ CFLAGS+= -I./3rd/sqlite/install/include
 CFLAGS+= -I./3rd/openssl/install/include 
 CFLAGS+= -std=c++0x -fPIC -Wdeprecated-declarations
 LDFLAGS+=  -Wl,-dn -lsqlite -L./3rd/sqlite/install/lib 
+LDFLAGS+=  -lparson -L./3rd/parson/install/lib 
 LDFLAGS+=  -Wl,-dy -ldl
 
 OUT:$(OBJ)

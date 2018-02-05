@@ -7,6 +7,9 @@
 
 #ifndef _THREAD_UTIL_H_
 #define _THREAD_UTIL_H_
+
+#include <list>
+#include <string>
 #include <sys/syscall.h>  
 #include <pthread.h>
 #include <string>
@@ -54,17 +57,28 @@ private:
 	pthread_cond_t _cond;
 };
 
-typedef void (*runner_t)(void* args);
+class PthreadInfo {
+public:
+	unsigned int 	id;
+	std::string 	name;
+	size_t 			stack_size;
+};
+
+typedef void (*runner_t)(void* _args);
 
 class Pthread {
 public:
 	Pthread(runner_t runner, void * args = NULL, std::string name = "Unknown");
 	virtual ~Pthread();
+	void set_stacksize(size_t stacksize = 1 * 1024 * 1024);
 	bool start(size_t stacksize = 1 * 1024 * 1024); 
 	void join(); 
 	void stop(bool with_block = false); 
 	bool is_run(); 
 	static unsigned int get_tid();
+	static void dump();
+	std::string name();
+	pthread_t handle();
 
 protected:
 	virtual void runner(void * var); 
@@ -73,11 +87,17 @@ private:
 	static void * loop(void * var); 
 
 protected:
-	pthread_t thread_handle;
-	std::string thread_name;
-	bool running;
-	runner_t _runner;
-	void * args;
+	pthread_t 	_thread_handle;
+	size_t 		_stacksize;
+	std::string _thread_name;
+	bool 		_running;
+	runner_t 	_runner;
+	void * 		_args;
+	
+	static		PthreadMutex		   mutex;
+	static		std::list<PthreadInfo> pthread_list;
+	
+	friend void * loop(void * var);
 };
 
 }
